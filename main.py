@@ -1,4 +1,5 @@
 import os
+import subprocess
 import hashlib
 import tkinter as tk
 from tkinter import filedialog
@@ -13,43 +14,40 @@ def select_directory():
 
 
 def search():
-    print('hello')
     directory = source_entry.get()
     hashes = {}
-    dups = []
+    dups = {}
     check_type = []
     images = ['JPG', 'JPEG', 'PNG', 'GIF', 'WEBP', 'TIFF', 'PSD', 'RAW', 'BMP', 'INDD', 'SVG', 'AI', 'EPS', 'PDF']
     docs = ['doc', 'docx', 'html', 'htm', 'odt', 'pdf', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'txt', 'key']
     videos = ['mp4', 'avi', 'mov', 'flv', 'acvhd']
     audio = ['mp3', 'pcm', 'wav', 'aiff', 'aac', 'ogg', 'wma', 'flac', 'alac', 'wma']
     if CheckVar1.get() == 1:
-        check_type = check_type + images
-    elif CheckVar2.get() == 1:
-        check_type = check_type + docs
-    elif CheckVar3.get() == 1:
-        check_type = check_type + videos
-    elif CheckVar4.get() == 1:
-        check_type = check_type + audio
-
+        check_type.extend(images)
+    if CheckVar2.get() == 1:
+        check_type.extend(docs)
+    if CheckVar3.get() == 1:
+        check_type.extend(videos)
+    if CheckVar4.get() == 1:
+        check_type.extend(audio)
+    if CheckVar5.get() == 1:
+        check_type.extend(images + docs + videos + audio)
     for root, dirs, files in os.walk(directory):
         for file in files:
-            filepath = os.path.join(root, file)
-            if check_type is []:
+            filepath = os.path.join(root, file).replace('\\', '/')
+            file_extension = file.split('.')[-1].lower()
+            if file_extension in check_type:
                 file_hash = hash_file(filepath)
                 if file_hash in hashes:
-                    dups.append(filepath)
+                    if file_hash not in dups:
+                        dups[file_hash] = [hashes[file_hash]]
+                    dups[file_hash].append(filepath)
                 else:
                     hashes[file_hash] = filepath
-            else:
-                for file_type in check_type:
-                    if filepath.endswith(file_type):
-                        file_hash = hash_file(filepath)
-                        if file_hash in hashes:
-                            dups.append(filepath)
-                        else:
-                            hashes[file_hash] = filepath
-    print(dups)
-    return dups
+    duplicate_files = [files for files in dups.values() if len(files) > 1]
+    print(duplicate_files)
+    return duplicate_files
+
 
 
 def hash_file(path, block_size=65536):
@@ -67,18 +65,13 @@ def adjust_entry_width(text):
 
 def reset(flag=False):
     if flag:
-        if CheckVar5.get():
-            print("reset 1-4")
-            CheckVar1.set(0)
-            CheckVar2.set(0)
-            CheckVar3.set(0)
-            CheckVar4.set(0)
-        elif CheckVar1.get() or CheckVar2.get() or CheckVar3.get() or CheckVar4.get():
-            print("reset 5")
-            CheckVar5.set(0)
-    else:
-        if CheckVar5.get():
-            CheckVar5.set(0)
+        CheckVar5.set(0)
+
+def selectAll():
+    CheckVar1.set(0)
+    CheckVar2.set(0)
+    CheckVar3.set(0)
+    CheckVar4.set(0)
 
 
 # Create the main window
@@ -103,7 +96,7 @@ C1 = Checkbutton(window, text="Images", variable=CheckVar1, onvalue=1, offvalue=
 C2 = Checkbutton(window, text="Documents", variable=CheckVar2, onvalue=1, offvalue=0, command=lambda: reset(True))
 C3 = Checkbutton(window, text="Audio", variable=CheckVar3, onvalue=1, offvalue=0, command=lambda: reset(True))
 C4 = Checkbutton(window, text="Videos", variable=CheckVar4, onvalue=1, offvalue=0, command=lambda: reset(True))
-C5 = Checkbutton(window, text="All", variable=CheckVar5, onvalue=1, offvalue=0, command=lambda: reset(True))
+C5 = Checkbutton(window, text="All", variable=CheckVar5, onvalue=1, offvalue=0, command=selectAll)
 CheckVar5.set(1)
 C1.grid(row=3, column=0, sticky="w")
 C2.grid(row=4, column=0, sticky="w")
