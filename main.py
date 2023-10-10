@@ -15,10 +15,13 @@ def select_directory():
 
 def search():
     directory = source_entry.get()
+    if not directory:
+        print("No directory selected")
+        return
     hashes = {}
     dups = {}
     check_type = []
-    images = ['JPG', 'JPEG', 'PNG', 'GIF', 'WEBP', 'TIFF', 'PSD', 'RAW', 'BMP', 'INDD', 'SVG', 'AI', 'EPS', 'PDF']
+    images = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'tiff', 'psd', 'raw', 'bmp', 'indd', 'svg', 'ai', 'eps']
     docs = ['doc', 'docx', 'html', 'htm', 'odt', 'pdf', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'txt', 'key']
     videos = ['mp4', 'avi', 'mov', 'flv', 'acvhd']
     audio = ['mp3', 'pcm', 'wav', 'aiff', 'aac', 'ogg', 'wma', 'flac', 'alac', 'wma']
@@ -45,9 +48,13 @@ def search():
                 else:
                     hashes[file_hash] = filepath
     duplicate_files = [files for files in dups.values() if len(files) > 1]
-    print(duplicate_files)
-    return duplicate_files
+    showDuplicates(duplicate_files)
 
+
+def showDuplicates(duplicate_files):
+    window.destroy()
+    for i in duplicate_files:
+        print(i)
 
 
 def hash_file(path, block_size=65536):
