@@ -53,8 +53,25 @@ def search():
 
 def showDuplicates(duplicate_files):
     window.destroy()
+
+    window2_main = tk.Tk()
+    window2_main.title("See Dups")
+
+    # Create a LabelFrame to contain content
+    content_frame = tk.LabelFrame(window2_main, text="Duplicate Files", pady=20)
+
+    # Create a Text widget to display duplicate file paths
+    text_widget = tk.Text(content_frame, wrap=tk.WORD, width=40, height=10)
+    text_widget.grid(row=0, column=0, padx=10, pady=10)
+    
+    # Insert the duplicate file paths into the Text widget
     for i in duplicate_files:
-        print(i)
+        for dup in i:
+            text_widget.insert(tk.END, dup + "\n")
+
+    content_frame.pack(padx=20, pady=20)
+
+    window2_main.mainloop()
 
 
 def hash_file(path, block_size=65536):
@@ -70,9 +87,11 @@ def hash_file(path, block_size=65536):
 def adjust_entry_width(text):
     source_entry.config(width=len(text) + 3)
 
+
 def reset(flag=False):
     if flag:
         CheckVar5.set(0)
+
 
 def selectAll():
     CheckVar1.set(0)
